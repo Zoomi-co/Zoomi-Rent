@@ -69,6 +69,21 @@ Optional: `GOOGLE_DRIVE_ROOT_FOLDER_ID`, `GOOGLE_SERVICE_ACCOUNT_EMAIL`, `GOOGLE
 - [ ] Copy REST URL and token to env vars
 - Required: units, properties, pending-customers, manual-expenses use Redis in serverless
 
+### Keepalive cron
+
+Upstash archives free-tier databases after a prolonged period with no commands
+(its FAQ states a minimum of 14 days, with warning emails first). `vercel.json`
+schedules `GET /api/cron/keepalive` once a day; the route writes a timestamp to
+the dedicated `zoomi:keepalive` key and touches no application data.
+
+- Vercel cron jobs only run against the **production** deployment, so this takes
+  effect once the change is deployed to production.
+- [ ] Optional: set `CRON_SECRET` in Vercel so only its cron requests are
+      accepted (Vercel sends it as `Authorization: Bearer $CRON_SECRET`).
+- Verify after deploy: `curl https://rent.zoomi.co/api/cron/keepalive` (add
+  `-H "Authorization: Bearer $CRON_SECRET"` if the secret is set) should return
+  `{"ok":true,"pingedAt":"..."}`.
+
 ## Post-deploy
 
 - [ ] Test customer login flow
